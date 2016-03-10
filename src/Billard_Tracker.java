@@ -35,17 +35,23 @@ public class Billard_Tracker implements PlugInFilter
         byte[] pixHue = (byte[]) ipHue.getPixels();
         
         int i1 = 0, i2 = 0;
-        
-        for (int y=0; y < h2; y++) 
-        {   
-            for (int x=0; x<w2; x++) 
-            {
-                //???
-            }
 
+        for (int y=0; y < h1; y+=2) {
+            for (int x = 0; x < w1; x += 2) {
+                int green = getPixel(x, y, w1, pix1);
+                int blue = getPixel(x + 1, y, w1, pix1);
+                int red = getPixel(x, y + 1, w1, pix1);
+                int green2 = getPixel(x + 1, y + 1, w1, pix1);
+
+                pixRGB[y / 2 * w2 + x / 2] = ((red & 0xff) << 16) + ((green & 0xff) << 8) + (blue & 0xff);
+
+                float[] hsb = new float[3];
+                Color.RGBtoHSB(red, green, blue, hsb);
+                pixGray[y / 2 * w2 + x / 2] = (byte) (hsb[2]*255);
+                pixHue[y / 2 * w2 + x / 2] = (byte) (hsb[0]*255);
+            }
         }
 
-        
         long ms = System.currentTimeMillis() - msStart;
         System.out.println(ms);
         ImageStatistics stats = ipGray.getStatistics();
@@ -67,6 +73,10 @@ public class Billard_Tracker implements PlugInFilter
         imgRGB.updateAndDraw();
         imgHue.show();
         imgHue.updateAndDraw();
+    }
+
+    private static int getPixel(int x, int y, int picWidth, byte[] pic) {
+        return pic[y*picWidth+x];
     }
     
     public static void main(String[] args)
